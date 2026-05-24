@@ -11,14 +11,14 @@
       "android": { "buildType": "apk" },
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_SERVER_URL": "https://dames-africa-production.up.railway.app"
+        "EXPO_PUBLIC_SERVER_URL": "https://dames-africa-production-1a88.up.railway.app"
       }
     },
     "production": {
       "android": { "buildType": "app-bundle" },
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_SERVER_URL": "https://dames-africa-production.up.railway.app"
+        "EXPO_PUBLIC_SERVER_URL": "https://dames-africa-production-1a88.up.railway.app"
       }
     }
   },
