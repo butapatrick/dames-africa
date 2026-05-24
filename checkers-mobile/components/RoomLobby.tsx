@@ -8,9 +8,11 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  FlatList,
+  Modal,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Colors } from '../constants/colors';
+import { SUPPORTED_LANGUAGES, changeLanguage } from '../i18n';
 import type { GameRecord } from '../store/gameStore';
 
 interface Props {
@@ -30,11 +32,18 @@ export default function RoomLobby({
   error,
   history,
 }: Props) {
+  const { t, i18n } = useTranslation();
   const [mode, setMode] = useState<'home' | 'create' | 'join'>('home');
   const [roomCode, setRoomCode] = useState('');
+  const [langModalVisible, setLangModalVisible] = useState(false);
 
   const handleJoin = () => {
     if (roomCode.trim().length === 6) onJoinRoom(roomCode.trim().toUpperCase());
+  };
+
+  const handleSelectLanguage = async (code: string) => {
+    await changeLanguage(code);
+    setLangModalVisible(false);
   };
 
   return (
@@ -48,21 +57,29 @@ export default function RoomLobby({
       >
         {/* Logo / Header */}
         <View style={styles.header}>
+          {/* Language button top-right */}
+          <Pressable
+            style={styles.langBtn}
+            onPress={() => setLangModalVisible(true)}
+          >
+            <Text style={styles.langBtnText}>🌐</Text>
+          </Pressable>
+
           <View style={styles.logoRow}>
             <View style={[styles.logoPiece, { backgroundColor: Colors.piece1 }]} />
             <View style={[styles.logoPiece, { backgroundColor: Colors.piece2 }]} />
           </View>
-          <Text style={styles.appName}>Dames Africa</Text>
-          <Text style={styles.appSubtitle}>International Draughts 10×10</Text>
+          <Text style={styles.appName}>{t('app_title')}</Text>
+          <Text style={styles.appSubtitle}>{t('subtitle')}</Text>
         </View>
 
         {/* Card */}
         <View style={styles.card}>
           {/* Name input always visible */}
-          <Text style={styles.label}>Your Name</Text>
+          <Text style={styles.label}>{t('your_name')}</Text>
           <TextInput
             style={styles.input}
-            placeholder="Enter your name"
+            placeholder={t('enter_name')}
             placeholderTextColor={Colors.textMuted}
             value={playerName}
             onChangeText={onPlayerNameChange}
@@ -82,43 +99,38 @@ export default function RoomLobby({
                 style={[styles.btn, styles.btnPrimary, !playerName.trim() && styles.btnDisabled]}
                 onPress={() => playerName.trim() && setMode('create')}
               >
-                <Text style={styles.btnPrimaryText}>Create Game</Text>
+                <Text style={styles.btnPrimaryText}>{t('create_game')}</Text>
               </Pressable>
               <Pressable
                 style={[styles.btn, styles.btnSecondary, !playerName.trim() && styles.btnDisabled]}
                 onPress={() => playerName.trim() && setMode('join')}
               >
-                <Text style={styles.btnSecondaryText}>Join Game</Text>
+                <Text style={styles.btnSecondaryText}>{t('join_game')}</Text>
               </Pressable>
             </View>
           )}
 
           {mode === 'create' && (
             <View style={styles.buttonGroup}>
-              <Text style={styles.modeHint}>
-                A 6-character room code will be generated for you to share.
-              </Text>
-              <Pressable
-                style={[styles.btn, styles.btnPrimary]}
-                onPress={onCreateRoom}
-              >
-                <Text style={styles.btnPrimaryText}>Create Room</Text>
+              <Text style={styles.modeHint}>{t('room_code_hint')}</Text>
+              <Pressable style={[styles.btn, styles.btnPrimary]} onPress={onCreateRoom}>
+                <Text style={styles.btnPrimaryText}>{t('create_room')}</Text>
               </Pressable>
               <Pressable style={[styles.btn, styles.btnGhost]} onPress={() => setMode('home')}>
-                <Text style={styles.btnGhostText}>Back</Text>
+                <Text style={styles.btnGhostText}>{t('back')}</Text>
               </Pressable>
             </View>
           )}
 
           {mode === 'join' && (
             <View style={styles.buttonGroup}>
-              <Text style={styles.label}>Room Code</Text>
+              <Text style={styles.label}>{t('room_code')}</Text>
               <TextInput
                 style={[styles.input, styles.codeInput]}
                 placeholder="ABC123"
                 placeholderTextColor={Colors.textMuted}
                 value={roomCode}
-                onChangeText={(t) => setRoomCode(t.toUpperCase())}
+                onChangeText={(tx) => setRoomCode(tx.toUpperCase())}
                 maxLength={6}
                 autoCapitalize="characters"
                 returnKeyType="join"
@@ -133,10 +145,10 @@ export default function RoomLobby({
                 ]}
                 onPress={handleJoin}
               >
-                <Text style={styles.btnPrimaryText}>Join Room</Text>
+                <Text style={styles.btnPrimaryText}>{t('join_room')}</Text>
               </Pressable>
               <Pressable style={[styles.btn, styles.btnGhost]} onPress={() => setMode('home')}>
-                <Text style={styles.btnGhostText}>Back</Text>
+                <Text style={styles.btnGhostText}>{t('back')}</Text>
               </Pressable>
             </View>
           )}
@@ -145,7 +157,7 @@ export default function RoomLobby({
         {/* Recent games */}
         {history.length > 0 && (
           <View style={styles.historySection}>
-            <Text style={styles.historyTitle}>Recent Games</Text>
+            <Text style={styles.historyTitle}>{t('recent_games')}</Text>
             {history.slice(0, 5).map((record, i) => (
               <View key={i} style={styles.historyRow}>
                 <View
@@ -160,7 +172,7 @@ export default function RoomLobby({
                       { color: record.result === 'win' ? Colors.success : Colors.error },
                     ]}
                   >
-                    {record.result === 'win' ? 'WIN' : 'LOSS'}
+                    {record.result === 'win' ? t('win') : t('loss')}
                   </Text>
                 </View>
                 <Text style={styles.historyOpponent}>vs {record.opponentName}</Text>
@@ -175,10 +187,43 @@ export default function RoomLobby({
         {/* Rules summary */}
         <View style={styles.rulesBox}>
           <Text style={styles.rulesText}>
-            Capture is mandatory · Maximum captures required · Kings move any distance
+            {t('capture_mandatory')} · {t('max_captures')} · {t('kings_move')}
           </Text>
         </View>
+
+        {/* Copyright */}
+        <Text style={styles.copyright}>{t('copyright')}</Text>
       </ScrollView>
+
+      {/* Language selector modal */}
+      <Modal
+        visible={langModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setLangModalVisible(false)}
+      >
+        <Pressable style={styles.modalOverlay} onPress={() => setLangModalVisible(false)}>
+          <View style={styles.langModal}>
+            <Text style={styles.langModalTitle}>{t('select_language')}</Text>
+            {SUPPORTED_LANGUAGES.map((lang) => {
+              const isActive = i18n.language === lang.code;
+              return (
+                <Pressable
+                  key={lang.code}
+                  style={[styles.langRow, isActive && styles.langRowActive]}
+                  onPress={() => handleSelectLanguage(lang.code)}
+                >
+                  <Text style={styles.langFlag}>{lang.flag}</Text>
+                  <Text style={[styles.langName, isActive && styles.langNameActive]}>
+                    {lang.name}
+                  </Text>
+                  {isActive && <Text style={styles.langCheck}>✓</Text>}
+                </Pressable>
+              );
+            })}
+          </View>
+        </Pressable>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -194,6 +239,20 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     paddingVertical: 16,
+  },
+  langBtn: {
+    position: 'absolute',
+    top: 12,
+    right: 0,
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: Colors.surface2,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    zIndex: 10,
+  },
+  langBtnText: {
+    fontSize: 20,
   },
   logoRow: {
     flexDirection: 'row',
@@ -360,5 +419,73 @@ const styles = StyleSheet.create({
     color: Colors.textMuted,
     textAlign: 'center',
     lineHeight: 18,
+  },
+  copyright: {
+    fontSize: 12,
+    color: Colors.textMuted,
+    textAlign: 'center',
+    paddingBottom: 8,
+    opacity: 0.7,
+  },
+  // Language modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: Colors.overlay,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  langModal: {
+    backgroundColor: Colors.modalBg,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    padding: 20,
+    width: '100%',
+    maxWidth: 340,
+    gap: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.6,
+    shadowRadius: 16,
+    elevation: 12,
+  },
+  langModalTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: Colors.textPrimary,
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  langRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 10,
+  },
+  langRowActive: {
+    backgroundColor: Colors.myTurnBg,
+    borderWidth: 1,
+    borderColor: Colors.myTurnBorder,
+  },
+  langFlag: {
+    fontSize: 22,
+  },
+  langName: {
+    flex: 1,
+    fontSize: 16,
+    color: Colors.textSecondary,
+    fontWeight: '500',
+  },
+  langNameActive: {
+    color: Colors.gold,
+    fontWeight: '700',
+  },
+  langCheck: {
+    fontSize: 16,
+    color: Colors.gold,
+    fontWeight: '800',
   },
 });

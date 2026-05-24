@@ -1,6 +1,7 @@
 import { io, Socket } from 'socket.io-client';
 import { SERVER_URL } from '../constants/config';
 import { useGameStore } from '../store/gameStore';
+import i18n from '../i18n';
 
 let socket: Socket | null = null;
 let initialized = false;
@@ -34,7 +35,7 @@ export function initSocket() {
   s.connect();
 
   s.on('connect_error', () => {
-    useGameStore.getState().setError('Cannot connect to server. Check your connection.');
+    useGameStore.getState().setError(i18n.t('cannot_connect'));
   });
 
   s.on('connect', () => {

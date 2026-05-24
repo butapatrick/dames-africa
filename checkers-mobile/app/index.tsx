@@ -1,11 +1,13 @@
 import React from 'react';
 import { SafeAreaView, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../store/gameStore';
 import { createRoom, joinRoom } from '../hooks/useSocket';
 import RoomLobby from '../components/RoomLobby';
 import { Colors } from '../constants/colors';
 
 export default function HomeScreen() {
+  const { t } = useTranslation();
   const {
     playerName,
     setPlayerName,
@@ -16,7 +18,7 @@ export default function HomeScreen() {
 
   const handleCreate = () => {
     if (!playerName.trim()) {
-      setError('Please enter your name first.');
+      setError(t('please_enter_name'));
       return;
     }
     setError('');
@@ -25,7 +27,7 @@ export default function HomeScreen() {
 
   const handleJoin = (code: string) => {
     if (!playerName.trim()) {
-      setError('Please enter your name first.');
+      setError(t('please_enter_name'));
       return;
     }
     setError('');

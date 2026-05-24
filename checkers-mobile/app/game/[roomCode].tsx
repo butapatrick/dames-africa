@@ -7,11 +7,10 @@ import {
   Modal,
   Pressable,
   ScrollView,
-  Alert,
   Platform,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import * as Sharing from 'expo-sharing';
+import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../../store/gameStore';
 import { movePiece, requestRematch, reconnectSocket, initSocket } from '../../hooks/useSocket';
 import Board from '../../components/Board';
@@ -19,6 +18,7 @@ import GameInfo from '../../components/GameInfo';
 import { Colors } from '../../constants/colors';
 
 export default function GameScreen() {
+  const { t } = useTranslation();
   const {
     gameState,
     playerRole,
@@ -47,7 +47,7 @@ export default function GameScreen() {
     // Record the loss
     if (gameState && playerRole) {
       const opponentRole = playerRole === 'player1' ? 'player2' : 'player1';
-      const opponentName = gameState.players[opponentRole]?.name ?? 'Opponent';
+      const opponentName = gameState.players[opponentRole]?.name ?? t('opponent');
       addGameRecord({
         date: new Date().toISOString(),
         opponentName,
@@ -77,7 +77,7 @@ export default function GameScreen() {
     return (
       <SafeAreaView style={styles.safe}>
         <View style={styles.centered}>
-          <Text style={styles.loadingText}>Loading game…</Text>
+          <Text style={styles.loadingText}>{t('loading_game')}</Text>
         </View>
       </SafeAreaView>
     );
@@ -85,15 +85,10 @@ export default function GameScreen() {
 
   const { status, winner, players } = gameState;
   const opponentRole = playerRole === 'player1' ? 'player2' : 'player1';
-  const myName = players[playerRole]?.name ?? 'You';
-  const opponentName = players[opponentRole]?.name ?? 'Opponent';
+  const myName = players[playerRole]?.name ?? t('you');
+  const opponentName = players[opponentRole]?.name ?? t('opponent');
   const winnerName = winner ? players[winner]?.name : null;
   const iWon = winner === playerRole;
-
-  // Record result when game ends
-  if (status === 'finished' && winner) {
-    // Will be called once since status stays 'finished'
-  }
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -102,7 +97,7 @@ export default function GameScreen() {
         <View style={styles.disconnectBanner}>
           <Text style={styles.disconnectText}>{disconnectMessage}</Text>
           <Pressable onPress={handleLeave}>
-            <Text style={styles.disconnectAction}>Leave</Text>
+            <Text style={styles.disconnectAction}>{t('leave')}</Text>
           </Pressable>
         </View>
       )}
@@ -130,7 +125,7 @@ export default function GameScreen() {
 
         {/* Bottom leave button */}
         <Pressable style={styles.leaveBtn} onPress={handleLeave}>
-          <Text style={styles.leaveBtnText}>Leave Game</Text>
+          <Text style={styles.leaveBtnText}>{t('leave_game')}</Text>
         </Pressable>
       </ScrollView>
 
@@ -143,22 +138,20 @@ export default function GameScreen() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Resign?</Text>
-            <Text style={styles.modalBody}>
-              This counts as a loss. Are you sure you want to resign?
-            </Text>
+            <Text style={styles.modalTitle}>{t('resign_title')}</Text>
+            <Text style={styles.modalBody}>{t('confirm_resign')}</Text>
             <View style={styles.modalButtons}>
               <Pressable
                 style={[styles.modalBtn, styles.modalBtnDanger]}
                 onPress={confirmResign}
               >
-                <Text style={styles.modalBtnDangerText}>Yes, Resign</Text>
+                <Text style={styles.modalBtnDangerText}>{t('yes_resign')}</Text>
               </Pressable>
               <Pressable
                 style={[styles.modalBtn, styles.modalBtnCancel]}
                 onPress={() => setResignModalVisible(false)}
               >
-                <Text style={styles.modalBtnCancelText}>Keep Playing</Text>
+                <Text style={styles.modalBtnCancelText}>{t('keep_playing')}</Text>
               </Pressable>
             </View>
           </View>
@@ -176,12 +169,12 @@ export default function GameScreen() {
           <View style={styles.modalCard}>
             <Text style={styles.gameOverEmoji}>{iWon ? '🏆' : '😞'}</Text>
             <Text style={styles.modalTitle}>
-              {iWon ? 'You Win!' : `${winnerName} Wins!`}
+              {iWon ? t('you_win') : t('you_lose', { name: winnerName })}
             </Text>
             <Text style={styles.modalBody}>
               {iWon
-                ? `You defeated ${opponentName}. Well played!`
-                : `${winnerName} won this game. Better luck next time!`}
+                ? t('well_played', { name: opponentName })
+                : t('better_luck', { name: winnerName })}
             </Text>
 
             {/* Scores */}
@@ -203,10 +196,10 @@ export default function GameScreen() {
 
             <View style={styles.modalButtons}>
               <Pressable style={[styles.modalBtn, styles.modalBtnPrimary]} onPress={handleRematch}>
-                <Text style={styles.modalBtnPrimaryText}>Rematch</Text>
+                <Text style={styles.modalBtnPrimaryText}>{t('rematch')}</Text>
               </Pressable>
               <Pressable style={[styles.modalBtn, styles.modalBtnCancel]} onPress={handleLeave}>
-                <Text style={styles.modalBtnCancelText}>Leave</Text>
+                <Text style={styles.modalBtnCancelText}>{t('leave')}</Text>
               </Pressable>
             </View>
           </View>

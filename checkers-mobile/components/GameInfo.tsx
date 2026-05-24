@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Colors } from '../constants/colors';
 import { TURN_TIMER_SECONDS } from '../constants/config';
 import type { GameState, PlayerRole } from '../store/gameStore';
@@ -12,13 +13,14 @@ interface Props {
 }
 
 export default function GameInfo({ gameState, playerRole, roomCode, onResign }: Props) {
+  const { t } = useTranslation();
   const [timeLeft, setTimeLeft] = useState(TURN_TIMER_SECONDS);
 
-  const { players, currentTurn, status, winner, scores, turnStartTime, pieces } = gameState;
+  const { players, currentTurn, status, scores, turnStartTime, pieces } = gameState;
 
   const opponentRole = playerRole === 'player1' ? 'player2' : 'player1';
-  const myName = players[playerRole]?.name ?? 'You';
-  const opponentName = players[opponentRole]?.name ?? 'Opponent';
+  const myName = players[playerRole]?.name ?? t('you');
+  const opponentName = players[opponentRole]?.name ?? t('opponent');
   const isMyTurn = currentTurn === playerRole && status === 'playing';
 
   const p1Count = Object.values(pieces).filter((p) => p.player === 'player1').length;
@@ -43,18 +45,20 @@ export default function GameInfo({ gameState, playerRole, roomCode, onResign }: 
     <View style={styles.container}>
       {/* Room code row */}
       <View style={styles.roomRow}>
-        <Text style={styles.roomLabel}>Room</Text>
+        <Text style={styles.roomLabel}>{t('room')}</Text>
         <Text style={styles.roomCode}>{roomCode}</Text>
       </View>
 
       {/* Player rows */}
       <PlayerRow
         name={myName}
-        label="You"
+        label={t('you')}
         isPlayer1={playerRole === 'player1'}
         isActive={currentTurn === playerRole}
         score={scores[playerRole]}
         pieceCount={myCount}
+        winsLabel={t('wins', { count: scores[playerRole] })}
+        piecesLabel={t('pieces', { count: myCount })}
       />
       <View style={styles.vsRow}>
         <View style={styles.vsDivider} />
@@ -63,18 +67,20 @@ export default function GameInfo({ gameState, playerRole, roomCode, onResign }: 
       </View>
       <PlayerRow
         name={opponentName}
-        label="Opponent"
+        label={t('opponent')}
         isPlayer1={opponentRole === 'player1'}
         isActive={currentTurn === opponentRole}
         score={scores[opponentRole]}
         pieceCount={theirCount}
+        winsLabel={t('wins', { count: scores[opponentRole] })}
+        piecesLabel={t('pieces', { count: theirCount })}
       />
 
       {/* Turn / Timer */}
       {status === 'playing' && (
         <View style={[styles.turnBadge, isMyTurn ? styles.myTurn : styles.theirTurn]}>
           <Text style={[styles.turnText, isMyTurn && styles.myTurnText]}>
-            {isMyTurn ? 'Your turn' : `${opponentName}'s turn`}
+            {isMyTurn ? t('your_turn') : t('opponent_turn', { name: opponentName })}
           </Text>
           <Text style={[styles.timer, timerUrgent && styles.timerUrgent]}>
             {timeLeft}s
@@ -82,10 +88,10 @@ export default function GameInfo({ gameState, playerRole, roomCode, onResign }: 
         </View>
       )}
 
-      {/* Resign button (only during play and on my turn) */}
+      {/* Resign button */}
       {status === 'playing' && (
         <Pressable style={styles.resignBtn} onPress={onResign}>
-          <Text style={styles.resignText}>Resign</Text>
+          <Text style={styles.resignText}>{t('resign')}</Text>
         </Pressable>
       )}
     </View>
@@ -99,9 +105,11 @@ interface PlayerRowProps {
   isActive: boolean;
   score: number;
   pieceCount: number;
+  winsLabel: string;
+  piecesLabel: string;
 }
 
-function PlayerRow({ name, label, isPlayer1, isActive, score, pieceCount }: PlayerRowProps) {
+function PlayerRow({ name, label, isPlayer1, isActive, winsLabel, piecesLabel }: PlayerRowProps) {
   return (
     <View style={[styles.playerRow, isActive && styles.playerRowActive]}>
       <View
@@ -116,8 +124,8 @@ function PlayerRow({ name, label, isPlayer1, isActive, score, pieceCount }: Play
         </Text>
         <Text style={styles.playerLabel}>{label}</Text>
       </View>
-      <Text style={styles.pieceCount}>{pieceCount} pcs</Text>
-      <Text style={styles.score}>{score}W</Text>
+      <Text style={styles.pieceCount}>{piecesLabel}</Text>
+      <Text style={styles.score}>{winsLabel}</Text>
     </View>
   );
 }

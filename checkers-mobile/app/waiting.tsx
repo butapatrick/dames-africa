@@ -9,18 +9,20 @@ import {
   Share,
 } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
+import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../store/gameStore';
 import { reconnectSocket, initSocket } from '../hooks/useSocket';
 import { Colors } from '../constants/colors';
 
 export default function WaitingScreen() {
+  const { t } = useTranslation();
   const { roomCode, playerName, reset } = useGameStore();
 
   const handleShare = async () => {
     try {
       await Share.share({
-        message: `Join my Dames Africa game! Room code: ${roomCode}\nDownload the app and enter this code to play.`,
-        title: 'Join my Dames Africa game',
+        message: t('share_invite', { code: roomCode }),
+        title: t('share_invite_title'),
       });
     } catch {}
   };
@@ -39,40 +41,39 @@ export default function WaitingScreen() {
     <SafeAreaView style={styles.safe}>
       <View style={styles.container}>
         {/* Header */}
-        <Text style={styles.title}>Room Created!</Text>
-        <Text style={styles.subtitle}>Share this code with your opponent</Text>
+        <Text style={styles.title}>{t('room_created')}</Text>
+        <Text style={styles.subtitle}>{t('share_code')}</Text>
 
         {/* Big room code */}
         <Pressable style={styles.codeCard} onPress={handleCopy}>
           <Text style={styles.codeText}>{roomCode}</Text>
-          <Text style={styles.codeTap}>Tap to copy</Text>
+          <Text style={styles.codeTap}>{t('tap_to_copy')}</Text>
         </Pressable>
 
         {/* Waiting indicator */}
         <View style={styles.waitingRow}>
           <ActivityIndicator size="small" color={Colors.gold} />
-          <Text style={styles.waitingText}>Waiting for opponent to join…</Text>
+          <Text style={styles.waitingText}>{t('waiting_opponent')}</Text>
         </View>
 
         {/* Buttons */}
         <View style={styles.buttons}>
           <Pressable style={styles.btnShare} onPress={handleShare}>
-            <Text style={styles.btnShareText}>Share Code</Text>
+            <Text style={styles.btnShareText}>{t('share_code_btn')}</Text>
           </Pressable>
           <Pressable style={styles.btnCancel} onPress={handleCancel}>
-            <Text style={styles.btnCancelText}>Cancel</Text>
+            <Text style={styles.btnCancelText}>{t('cancel')}</Text>
           </Pressable>
         </View>
 
         {/* How to join instruction */}
         <View style={styles.instructionBox}>
           <Text style={styles.instructionText}>
-            Your opponent should open Dames Africa, tap <Text style={styles.bold}>Join Game</Text>, and enter code{' '}
-            <Text style={styles.codeInline}>{roomCode}</Text>.
+            {t('join_instruction', { joinGame: t('join_game'), code: roomCode })}
           </Text>
         </View>
 
-        <Text style={styles.yourName}>Playing as: {playerName}</Text>
+        <Text style={styles.yourName}>{t('playing_as', { name: playerName })}</Text>
       </View>
     </SafeAreaView>
   );
@@ -177,16 +178,6 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     lineHeight: 20,
     textAlign: 'center',
-  },
-  bold: {
-    fontWeight: '700',
-    color: Colors.textPrimary,
-  },
-  codeInline: {
-    fontFamily: 'monospace',
-    fontWeight: '800',
-    color: Colors.gold,
-    letterSpacing: 2,
   },
   yourName: {
     fontSize: 13,
