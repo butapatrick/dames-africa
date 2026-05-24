@@ -22,7 +22,9 @@ const io = new Server(server, {
   }
 });
 
+console.log('PORT from env:', process.env.PORT);
 const PORT = process.env.PORT || 3001;
+console.log('Using PORT:', PORT);
 
 // In-memory store: roomCode -> gameState
 const rooms = {};
