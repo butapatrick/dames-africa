@@ -1,16 +1,19 @@
 import { Platform } from 'react-native';
 
-// On Android emulator, localhost = the emulator itself. Host machine is at 10.0.2.2.
-// On iOS simulator, localhost works fine.
-const DEV_URL =
+// Fallback used only when EXPO_PUBLIC_SERVER_URL is not set in .env / EAS secrets.
+const DEV_FALLBACK =
   Platform.OS === 'android'
-    ? 'http://10.0.2.2:3001'
-    : 'http://localhost:3001';
+    ? 'http://10.0.2.2:3001'   // Android emulator → host machine
+    : 'http://localhost:3001';  // iOS simulator → host machine
 
-// Replace with your deployed server URL (Railway / Render / Fly.io) before publishing.
-export const SERVER_URL = __DEV__
-  ? DEV_URL
-  : 'https://dames-africa-server.railway.app';
+// EXPO_PUBLIC_* vars are inlined at build time by Expo.
+// Set EXPO_PUBLIC_SERVER_URL in:
+//   • .env              → local dev (expo start)
+//   • .env.production   → local reference only
+//   • eas.json env      → EAS cloud builds (preview + production)
+export const SERVER_URL =
+  process.env.EXPO_PUBLIC_SERVER_URL ??
+  (__DEV__ ? DEV_FALLBACK : '');
 
 export const TURN_TIMER_SECONDS = 30;
 export const BOARD_SIZE = 10;

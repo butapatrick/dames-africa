@@ -198,6 +198,7 @@ io.on('connection', (socket) => {
   });
 });
 
+app.get('/', (req, res) => res.json({ status: 'ok', app: 'dames-africa-server' }));
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
 server.listen(PORT, () => {

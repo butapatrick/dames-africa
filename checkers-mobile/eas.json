@@ -9,11 +9,17 @@
     },
     "preview": {
       "android": { "buildType": "apk" },
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_SERVER_URL": "https://YOUR-APP.railway.app"
+      }
     },
     "production": {
       "android": { "buildType": "app-bundle" },
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_SERVER_URL": "https://YOUR-APP.railway.app"
+      }
     }
   },
   "submit": {
