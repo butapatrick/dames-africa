@@ -1,6 +1,12 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
+import { View, StyleSheet, Dimensions, Platform } from 'react-native';
 import * as Haptics from 'expo-haptics';
+
+// expo-haptics is a no-op on web (browser has no vibration API for these calls)
+const haptic = {
+  selection: () => { if (Platform.OS !== 'web') Haptics.selectionAsync(); },
+  impact: (s: Haptics.ImpactFeedbackStyle) => { if (Platform.OS !== 'web') Haptics.impactAsync(s); },
+};
 import { Colors } from '../constants/colors';
 import { BOARD_SIZE } from '../constants/config';
 import Cell from './Cell';
@@ -60,7 +66,7 @@ export default function Board({ gameState, playerRole, onMove }: Props) {
       // Tap on a selectable piece → select (or toggle off)
       if (cellPieceId && selectablePieceIds.has(cellPieceId)) {
         if (cellPieceId !== selectedPieceId) {
-          Haptics.selectionAsync();
+          haptic.selection();
         }
         setSelectedPieceId((prev) => (prev === cellPieceId ? null : cellPieceId));
         return;
@@ -69,7 +75,7 @@ export default function Board({ gameState, playerRole, onMove }: Props) {
       // Tap on a highlighted destination → execute move
       if (selectedPieceId && highlights[`${row},${col}`]) {
         const isCapture = highlights[`${row},${col}`].isCapture;
-        Haptics.impactAsync(
+        haptic.impact(
           isCapture
             ? Haptics.ImpactFeedbackStyle.Heavy
             : Haptics.ImpactFeedbackStyle.Medium

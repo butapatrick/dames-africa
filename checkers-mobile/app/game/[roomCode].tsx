@@ -8,6 +8,7 @@ import {
   Pressable,
   ScrollView,
   Alert,
+  Platform,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import * as Sharing from 'expo-sharing';
@@ -60,7 +61,9 @@ export default function GameScreen() {
   };
 
   const handleRematch = () => {
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    if (Platform.OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
     requestRematch();
   };
 
