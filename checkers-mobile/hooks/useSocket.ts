@@ -9,6 +9,10 @@ export function getSocket(): Socket {
   if (!socket) {
     socket = io(SERVER_URL, {
       autoConnect: false,
+      // Start with polling so browsers behind strict proxies can still connect,
+      // then upgrade to WebSocket once the connection is established.
+      transports: ['polling', 'websocket'],
+      reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
       timeout: 10000,

@@ -1,19 +1,19 @@
 import { Platform } from 'react-native';
 
-// Fallback used only when EXPO_PUBLIC_SERVER_URL is not set in .env / EAS secrets.
+// Production server — always used when EXPO_PUBLIC_SERVER_URL is not set.
+const PROD_URL = 'https://dames-africa-production-1a88.up.railway.app';
+
+// Dev fallback: Android emulator reaches host via 10.0.2.2; iOS/web use localhost.
 const DEV_FALLBACK =
   Platform.OS === 'android'
-    ? 'http://10.0.2.2:3001'   // Android emulator → host machine
-    : 'http://localhost:3001';  // iOS simulator → host machine
+    ? 'http://10.0.2.2:3001'
+    : 'http://localhost:3001';
 
 // EXPO_PUBLIC_* vars are inlined at build time by Expo.
-// Set EXPO_PUBLIC_SERVER_URL in:
-//   • .env              → local dev (expo start)
-//   • .env.production   → local reference only
-//   • eas.json env      → EAS cloud builds (preview + production)
+// Priority: env var (EAS / Vercel build env) → dev fallback in dev → prod URL in prod.
 export const SERVER_URL =
-  process.env.EXPO_PUBLIC_SERVER_URL ??
-  (__DEV__ ? DEV_FALLBACK : '');
+  process.env.EXPO_PUBLIC_SERVER_URL ||
+  (__DEV__ ? DEV_FALLBACK : PROD_URL);
 
 export const TURN_TIMER_SECONDS = 30;
 export const BOARD_SIZE = 10;
