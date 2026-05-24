@@ -198,9 +198,11 @@ io.on('connection', (socket) => {
   });
 });
 
-app.get('/', (req, res) => res.json({ status: 'ok', app: 'dames-africa-server' }));
+app.get('/', (req, res) => res.json({ status: 'ok', message: 'Dames Africa Server Running' }));
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
-server.listen(PORT, () => {
-  console.log(`Checkers server running on http://localhost:${PORT}`);
+// Bind to 0.0.0.0 so Railway (and any container host) can reach the process.
+// Binding to localhost/127.0.0.1 only accepts connections from within the container.
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT}`);
 });
